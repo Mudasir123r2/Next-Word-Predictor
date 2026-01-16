@@ -319,7 +319,17 @@ st.markdown("""
 def load_resources():
     """Load the trained model and tokenizer"""
     try:
-        model = load_model('next_word_model.h5')
+        # Load model with compatibility settings for different TensorFlow versions
+        import tensorflow as tf
+        model = tf.keras.models.load_model('next_word_model.h5', compile=False)
+        
+        # Recompile the model with current TensorFlow version
+        model.compile(
+            loss='categorical_crossentropy',
+            optimizer='adam',
+            metrics=['accuracy']
+        )
+        
         with open('tokenizer.pickle', 'rb') as handle:
             tokenizer = pickle.load(handle)
         return model, tokenizer
