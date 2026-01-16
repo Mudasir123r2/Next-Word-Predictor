@@ -551,13 +551,13 @@ def main():
                             "{input_text} <span class="prediction-word">{predictions[0][0]}</span>"
                         </div>
                         <div style="text-align: center;">
-                            <span class="confidence-badge">Confidence: {predictions[0][1]:.2f}%</span>
+                            <span class="confidence-badge">Confidence: {float(predictions[0][1]):.2f}%</span>
                         </div>
                     </div>
                 """, unsafe_allow_html=True)
                 
                 # Progress bar for top prediction
-                st.progress(predictions[0][1] / 100)
+                st.progress(float(predictions[0][1]) / 100)
                 
                 # All predictions in styled cards
                 st.markdown("<br>", unsafe_allow_html=True)
@@ -572,7 +572,7 @@ def main():
                         <div class="prediction-item" style="border-left-color: {rank_colors[i-1]};">
                             <span class="prediction-rank">#{i}</span>
                             <span class="prediction-word-item">{word}</span>
-                            <span class="prediction-confidence">{prob:.2f}%</span>
+                            <span class="prediction-confidence">{float(prob):.2f}%</span>
                         </div>
                     """, unsafe_allow_html=True)
                 
@@ -584,11 +584,11 @@ def main():
                 col1, col2, col3 = st.columns(3)
                 
                 with col1:
-                    st.metric("Top Confidence", f"{predictions[0][1]:.2f}%", 
-                             delta=f"{predictions[0][1] - predictions[1][1]:.2f}% vs 2nd")
+                    st.metric("Top Confidence", f"{float(predictions[0][1]):.2f}%", 
+                             delta=f"{float(predictions[0][1] - predictions[1][1]):.2f}% vs 2nd")
                 
                 with col2:
-                    avg_confidence = sum(p[1] for p in predictions) / len(predictions)
+                    avg_confidence = sum(float(p[1]) for p in predictions) / len(predictions)
                     st.metric("Avg Confidence", f"{avg_confidence:.2f}%")
                 
                 with col3:
