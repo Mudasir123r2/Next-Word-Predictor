@@ -344,7 +344,13 @@ def load_resources():
         with h5py.File(model_path, 'r') as f:
             # Get model config
             if 'model_config' in f.attrs:
-                model_config = json.loads(f.attrs.get('model_config').decode('utf-8'))
+                model_config_raw = f.attrs.get('model_config')
+                
+                # Handle both string and bytes
+                if isinstance(model_config_raw, bytes):
+                    model_config = json.loads(model_config_raw.decode('utf-8'))
+                else:
+                    model_config = json.loads(model_config_raw)
                 
                 # Clean config to remove time_major parameter from LSTM layers
                 if 'config' in model_config and 'layers' in model_config['config']:
