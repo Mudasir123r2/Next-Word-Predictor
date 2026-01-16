@@ -323,30 +323,30 @@ def load_resources():
     from tensorflow import keras
     import sys
     
-    # Fix for Keras 3 tokenizer compatibility
+    # Fix for Keras 3 tokenizer compatibility - MUST be before pickle.load
     sys.modules['keras.preprocessing'] = tf.keras.preprocessing
     sys.modules['keras.preprocessing.text'] = tf.keras.preprocessing.text
+    sys.modules['keras.src.preprocessing'] = tf.keras.preprocessing
+    sys.modules['keras.src.preprocessing.text'] = tf.keras.preprocessing.text
     
     model_path = 'next_word_model.h5'
     tokenizer_path = 'tokenizer.pickle'
     
     try:
-        # Load tokenizer first
+        # Load tokenizer first with compatibility fix
         with open(tokenizer_path, 'rb') as handle:
             tokenizer = pickle.load(handle)
         
         # Try to load model structure from H5 file manually
         import h5py
+        import json
+        
         with h5py.File(model_path, 'r') as f:
             # Get model config
             if 'model_config' in f.attrs:
-                import json
                 model_config = json.loads(f.attrs.get('model_config').decode('utf-8'))
                 
-                # Rebuild model from config, removing incompatible parameters
-                from tensorflow.keras.models import model_from_json
-                
-                # Clean config to remove time_major parameter
+                # Clean config to remove time_major parameter from LSTM layers
                 if 'config' in model_config and 'layers' in model_config['config']:
                     for layer in model_config['config']['layers']:
                         if layer.get('class_name') == 'LSTM':
@@ -354,6 +354,7 @@ def load_resources():
                                 del layer['config']['time_major']
                 
                 # Build model from cleaned config
+                from tensorflow.keras.models import model_from_json
                 model = model_from_json(json.dumps(model_config))
                 
                 # Load weights
@@ -368,15 +369,16 @@ def load_resources():
                 
                 return model, tokenizer
             else:
-                raise ValueError("No model config found")
+                raise ValueError("No model config found in H5 file")
                 
     except Exception as e:
         st.error(f"""
         ⚠️ **Error loading model: {str(e)}**
         
         The model has compatibility issues between TensorFlow versions.
-        Please retrain the model with the current TensorFlow version.
         """)
+        import traceback
+        st.code(traceback.format_exc())
         return None, None
 
 def predict_next_word(model, tokenizer, text, max_sequence_len):
