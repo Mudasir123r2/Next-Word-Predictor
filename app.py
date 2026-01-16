@@ -318,10 +318,38 @@ st.markdown("""
 @st.cache_resource
 def load_resources():
     """Load the trained model and tokenizer"""
+    import os
+    import urllib.request
+    
+    # Check if model files exist locally
+    model_path = 'next_word_model.h5'
+    tokenizer_path = 'tokenizer.pickle'
+    
+    # If running on Streamlit Cloud and files don't exist, show message
+    if not os.path.exists(model_path):
+        st.error("""
+        ⚠️ Model file not found. 
+        
+        For Streamlit Cloud deployment, please use Git LFS:
+        
+        ```bash
+        git lfs install
+        git lfs track "*.h5"
+        git lfs track "*.pickle"
+        git add .gitattributes
+        git add next_word_model.h5 tokenizer.pickle
+        git commit -m "Add model files with LFS"
+        git push origin main
+        ```
+        
+        Or upload model files to the repository manually.
+        """)
+        return None, None
+    
     try:
         # Load model with compatibility settings for different TensorFlow versions
         import tensorflow as tf
-        model = tf.keras.models.load_model('next_word_model.h5', compile=False)
+        model = tf.keras.models.load_model(model_path, compile=False)
         
         # Recompile the model with current TensorFlow version
         model.compile(
@@ -330,7 +358,7 @@ def load_resources():
             metrics=['accuracy']
         )
         
-        with open('tokenizer.pickle', 'rb') as handle:
+        with open(tokenizer_path, 'rb') as handle:
             tokenizer = pickle.load(handle)
         return model, tokenizer
     except Exception as e:
