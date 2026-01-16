@@ -342,16 +342,22 @@ def load_resources():
         from tensorflow.keras.layers import Embedding, LSTM, Dense, Dropout
         
         total_words = len(tokenizer.word_index) + 1
+        max_sequence_len = 14  # From the model
         
         # Build model with same architecture
         model = Sequential()
-        model.add(Embedding(total_words, 100, input_length=13))  # max_sequence_len - 1
+        model.add(Embedding(total_words, 100, input_length=max_sequence_len-1))
         model.add(LSTM(150, return_sequences=True))
         model.add(Dropout(0.2))
         model.add(LSTM(100))
         model.add(Dense(total_words, activation='softmax'))
         
-        # Load weights from the H5 file
+        # Build the model by passing a dummy input
+        import numpy as np
+        dummy_input = np.zeros((1, max_sequence_len-1))
+        model(dummy_input)
+        
+        # Now load weights from the H5 file
         model.load_weights(model_path)
         
         # Compile
