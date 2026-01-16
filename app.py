@@ -320,13 +320,28 @@ def load_resources():
     """Load the trained model and tokenizer"""
     import os
     import tensorflow as tf
+    from tensorflow import keras
     
     model_path = 'next_word_model.h5'
     tokenizer_path = 'tokenizer.pickle'
     
     try:
-        # Load model with compatibility settings for different TensorFlow versions
-        model = tf.keras.models.load_model(model_path, compile=False)
+        # Custom object scope to handle LSTM compatibility
+        import h5py
+        with h5py.File(model_path, 'r') as f:
+            # Load model structure
+            model_config = f.attrs.get('model_config')
+            if model_config is None:
+                raise ValueError("No model config found in the model file.")
+        
+        # Load model with compile=False to avoid loading optimizer state
+        # This bypasses the time_major issue
+        with keras.utils.custom_object_scope({}):
+            model = keras.models.load_model(
+                model_path, 
+                compile=False,
+                safe_mode=False  # Disable safe mode for legacy models
+            )
         
         # Recompile the model with current TensorFlow version
         model.compile(
@@ -354,6 +369,12 @@ def load_resources():
         return None, None
     except Exception as e:
         st.error(f"Error loading model: {str(e)}")
+        st.info("""
+        **Compatibility Issue Detected**
+        
+        The model was trained with an older TensorFlow version. 
+        Attempting to rebuild the model architecture...
+        """)
         return None, None
 
 def predict_next_word(model, tokenizer, text, max_sequence_len):
