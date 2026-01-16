@@ -337,45 +337,31 @@ def load_resources():
         with open(tokenizer_path, 'rb') as handle:
             tokenizer = pickle.load(handle)
         
-        # Try to load model structure from H5 file manually
-        import h5py
-        import json
+        # Manually build the model architecture (avoiding JSON deserialization issues)
+        from tensorflow.keras.models import Sequential
+        from tensorflow.keras.layers import Embedding, LSTM, Dense, Dropout
         
-        with h5py.File(model_path, 'r') as f:
-            # Get model config
-            if 'model_config' in f.attrs:
-                model_config_raw = f.attrs.get('model_config')
-                
-                # Handle both string and bytes
-                if isinstance(model_config_raw, bytes):
-                    model_config = json.loads(model_config_raw.decode('utf-8'))
-                else:
-                    model_config = json.loads(model_config_raw)
-                
-                # Clean config to remove time_major parameter from LSTM layers
-                if 'config' in model_config and 'layers' in model_config['config']:
-                    for layer in model_config['config']['layers']:
-                        if layer.get('class_name') == 'LSTM':
-                            if 'config' in layer and 'time_major' in layer['config']:
-                                del layer['config']['time_major']
-                
-                # Build model from cleaned config
-                from tensorflow.keras.models import model_from_json
-                model = model_from_json(json.dumps(model_config))
-                
-                # Load weights
-                model.load_weights(model_path)
-                
-                # Compile
-                model.compile(
-                    loss='categorical_crossentropy',
-                    optimizer='adam',
-                    metrics=['accuracy']
-                )
-                
-                return model, tokenizer
-            else:
-                raise ValueError("No model config found in H5 file")
+        total_words = len(tokenizer.word_index) + 1
+        
+        # Build model with same architecture
+        model = Sequential()
+        model.add(Embedding(total_words, 100, input_length=13))  # max_sequence_len - 1
+        model.add(LSTM(150, return_sequences=True))
+        model.add(Dropout(0.2))
+        model.add(LSTM(100))
+        model.add(Dense(total_words, activation='softmax'))
+        
+        # Load weights from the H5 file
+        model.load_weights(model_path)
+        
+        # Compile
+        model.compile(
+            loss='categorical_crossentropy',
+            optimizer='adam',
+            metrics=['accuracy']
+        )
+        
+        return model, tokenizer
                 
     except Exception as e:
         st.error(f"""
