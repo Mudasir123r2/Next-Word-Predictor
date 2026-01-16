@@ -321,59 +321,61 @@ def load_resources():
     import os
     import tensorflow as tf
     from tensorflow import keras
+    import sys
+    
+    # Fix for Keras 3 tokenizer compatibility
+    sys.modules['keras.preprocessing'] = tf.keras.preprocessing
+    sys.modules['keras.preprocessing.text'] = tf.keras.preprocessing.text
     
     model_path = 'next_word_model.h5'
     tokenizer_path = 'tokenizer.pickle'
     
     try:
-        # Custom object scope to handle LSTM compatibility
-        import h5py
-        with h5py.File(model_path, 'r') as f:
-            # Load model structure
-            model_config = f.attrs.get('model_config')
-            if model_config is None:
-                raise ValueError("No model config found in the model file.")
-        
-        # Load model with compile=False to avoid loading optimizer state
-        # This bypasses the time_major issue
-        with keras.utils.custom_object_scope({}):
-            model = keras.models.load_model(
-                model_path, 
-                compile=False,
-                safe_mode=False  # Disable safe mode for legacy models
-            )
-        
-        # Recompile the model with current TensorFlow version
-        model.compile(
-            loss='categorical_crossentropy',
-            optimizer='adam',
-            metrics=['accuracy']
-        )
-        
+        # Load tokenizer first
         with open(tokenizer_path, 'rb') as handle:
             tokenizer = pickle.load(handle)
-        return model, tokenizer
-    except FileNotFoundError as e:
-        st.error(f"""
-        ⚠️ **Model files not found in deployment.**
         
-        This usually happens when Git LFS files aren't properly downloaded on Streamlit Cloud.
-        
-        **To fix this:**
-        1. Verify Git LFS is installed: `git lfs install`
-        2. Check tracked files: `git lfs ls-files`
-        3. Force push LFS files: `git lfs push --all origin main`
-        
-        File not found: {str(e)}
-        """)
-        return None, None
+        # Try to load model structure from H5 file manually
+        import h5py
+        with h5py.File(model_path, 'r') as f:
+            # Get model config
+            if 'model_config' in f.attrs:
+                import json
+                model_config = json.loads(f.attrs.get('model_config').decode('utf-8'))
+                
+                # Rebuild model from config, removing incompatible parameters
+                from tensorflow.keras.models import model_from_json
+                
+                # Clean config to remove time_major parameter
+                if 'config' in model_config and 'layers' in model_config['config']:
+                    for layer in model_config['config']['layers']:
+                        if layer.get('class_name') == 'LSTM':
+                            if 'config' in layer and 'time_major' in layer['config']:
+                                del layer['config']['time_major']
+                
+                # Build model from cleaned config
+                model = model_from_json(json.dumps(model_config))
+                
+                # Load weights
+                model.load_weights(model_path)
+                
+                # Compile
+                model.compile(
+                    loss='categorical_crossentropy',
+                    optimizer='adam',
+                    metrics=['accuracy']
+                )
+                
+                return model, tokenizer
+            else:
+                raise ValueError("No model config found")
+                
     except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
-        st.info("""
-        **Compatibility Issue Detected**
+        st.error(f"""
+        ⚠️ **Error loading model: {str(e)}**
         
-        The model was trained with an older TensorFlow version. 
-        Attempting to rebuild the model architecture...
+        The model has compatibility issues between TensorFlow versions.
+        Please retrain the model with the current TensorFlow version.
         """)
         return None, None
 
