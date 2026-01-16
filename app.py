@@ -319,36 +319,13 @@ st.markdown("""
 def load_resources():
     """Load the trained model and tokenizer"""
     import os
-    import urllib.request
+    import tensorflow as tf
     
-    # Check if model files exist locally
     model_path = 'next_word_model.h5'
     tokenizer_path = 'tokenizer.pickle'
     
-    # If running on Streamlit Cloud and files don't exist, show message
-    if not os.path.exists(model_path):
-        st.error("""
-        ⚠️ Model file not found. 
-        
-        For Streamlit Cloud deployment, please use Git LFS:
-        
-        ```bash
-        git lfs install
-        git lfs track "*.h5"
-        git lfs track "*.pickle"
-        git add .gitattributes
-        git add next_word_model.h5 tokenizer.pickle
-        git commit -m "Add model files with LFS"
-        git push origin main
-        ```
-        
-        Or upload model files to the repository manually.
-        """)
-        return None, None
-    
     try:
         # Load model with compatibility settings for different TensorFlow versions
-        import tensorflow as tf
         model = tf.keras.models.load_model(model_path, compile=False)
         
         # Recompile the model with current TensorFlow version
@@ -361,6 +338,20 @@ def load_resources():
         with open(tokenizer_path, 'rb') as handle:
             tokenizer = pickle.load(handle)
         return model, tokenizer
+    except FileNotFoundError as e:
+        st.error(f"""
+        ⚠️ **Model files not found in deployment.**
+        
+        This usually happens when Git LFS files aren't properly downloaded on Streamlit Cloud.
+        
+        **To fix this:**
+        1. Verify Git LFS is installed: `git lfs install`
+        2. Check tracked files: `git lfs ls-files`
+        3. Force push LFS files: `git lfs push --all origin main`
+        
+        File not found: {str(e)}
+        """)
+        return None, None
     except Exception as e:
         st.error(f"Error loading model: {str(e)}")
         return None, None
