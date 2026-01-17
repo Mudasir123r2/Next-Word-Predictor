@@ -228,6 +228,16 @@ st.markdown("""
     section[data-testid="stSidebar"] button[kind="secondary"] {
         background-color: #000000 !important;
         border-radius: 8px !important;
+        padding: 0.5rem !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        position: sticky !important;
+        top: 1rem !important;
+        z-index: 999 !important;
+        margin: 1rem !important;
     }
     
     section[data-testid="stSidebar"] button[kind="secondary"]:hover {
@@ -236,6 +246,28 @@ st.markdown("""
     
     section[data-testid="stSidebar"] button[kind="secondary"] svg {
         fill: white !important;
+        width: 20px !important;
+        height: 20px !important;
+    }
+    
+    /* Mobile - Ensure sidebar close button is visible */
+    @media screen and (max-width: 768px) {
+        section[data-testid="stSidebar"] button[kind="secondary"] {
+            background-color: #000000 !important;
+            min-width: 48px !important;
+            min-height: 48px !important;
+            padding: 0.75rem !important;
+            position: absolute !important;
+            top: 1rem !important;
+            right: 1rem !important;
+            z-index: 9999 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        section[data-testid="stSidebar"] button[kind="secondary"] svg {
+            width: 24px !important;
+            height: 24px !important;
+        }
     }
     
     .sidebar-content {
