@@ -307,6 +307,21 @@ st.markdown("""
         animation: fadeIn 0.6s ease-out;
     }
     
+    /* Sidebar Toggle Button - Black */
+    button[kind="header"] {
+        background-color: #000000 !important;
+        color: white !important;
+        border-radius: 8px !important;
+    }
+    
+    button[kind="header"]:hover {
+        background-color: #2d3748 !important;
+    }
+    
+    button[kind="header"] svg {
+        fill: white !important;
+    }
+    
     /* Hide Streamlit Branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
