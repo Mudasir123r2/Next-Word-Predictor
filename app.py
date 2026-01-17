@@ -18,7 +18,7 @@ st.set_page_config(
     page_title="Next Word Predictor | AI-Powered Text Completion",
     page_icon="🧠",
     layout="wide",
-    initial_sidebar_state="auto"  # Changed to auto for better mobile experience
+    initial_sidebar_state="expanded"
 )
 
 # Custom CSS for professional styling
@@ -224,6 +224,20 @@ st.markdown("""
         padding-top: 3rem !important;
     }
     
+    /* Sidebar Collapse Button - Black Arrow */
+    section[data-testid="stSidebar"] button[kind="secondary"] {
+        background-color: #000000 !important;
+        border-radius: 8px !important;
+    }
+    
+    section[data-testid="stSidebar"] button[kind="secondary"]:hover {
+        background-color: #2d3748 !important;
+    }
+    
+    section[data-testid="stSidebar"] button[kind="secondary"] svg {
+        fill: white !important;
+    }
+    
     .sidebar-content {
         background: white;
         border-radius: 12px;
@@ -307,221 +321,9 @@ st.markdown("""
         animation: fadeIn 0.6s ease-out;
     }
     
-    /* Sidebar Toggle Button - Black */
-    button[kind="header"] {
-        background-color: #000000 !important;
-        color: white !important;
-        border-radius: 8px !important;
-    }
-    
-    button[kind="header"]:hover {
-        background-color: #2d3748 !important;
-    }
-    
-    button[kind="header"] svg {
-        fill: white !important;
-    }
-    
     /* Hide Streamlit Branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    
-    /* ============================================ */
-    /* MOBILE RESPONSIVE DESIGN - Media Queries    */
-    /* ============================================ */
-    
-    /* Tablets and smaller (max-width: 768px) */
-    @media screen and (max-width: 768px) {
-        .main {
-            padding: 1rem !important;
-        }
-        
-        .hero-container {
-            padding: 2rem 1.5rem !important;
-            margin-bottom: 1.5rem !important;
-        }
-        
-        .hero-title {
-            font-size: 2rem !important;
-            line-height: 1.3 !important;
-        }
-        
-        .hero-subtitle {
-            font-size: 1.1rem !important;
-        }
-        
-        .hero-description {
-            font-size: 0.95rem !important;
-            line-height: 1.6 !important;
-        }
-        
-        .card {
-            padding: 1.5rem !important;
-            border-radius: 12px !important;
-        }
-        
-        .prediction-card {
-            padding: 1.5rem !important;
-            margin: 1.5rem 0 !important;
-        }
-        
-        .prediction-text {
-            font-size: 1.3rem !important;
-            line-height: 1.6 !important;
-        }
-        
-        .confidence-badge {
-            font-size: 0.95rem !important;
-            padding: 0.4rem 1rem !important;
-        }
-        
-        .prediction-item {
-            padding: 1rem !important;
-            flex-wrap: wrap !important;
-        }
-        
-        .prediction-rank {
-            font-size: 1.2rem !important;
-            min-width: 30px !important;
-        }
-        
-        .prediction-word-item {
-            font-size: 1.1rem !important;
-        }
-        
-        .prediction-confidence {
-            font-size: 0.95rem !important;
-            padding: 0.2rem 0.8rem !important;
-        }
-        
-        .stTextInput > div > div > input {
-            font-size: 1rem !important;
-            padding: 0.8rem !important;
-        }
-        
-        .stButton > button {
-            font-size: 1rem !important;
-            padding: 0.7rem 2rem !important;
-            width: 100% !important;
-        }
-        
-        .sidebar-content {
-            padding: 1rem !important;
-        }
-        
-        .sidebar-title {
-            font-size: 1.1rem !important;
-        }
-        
-        .metric-card {
-            padding: 0.8rem !important;
-        }
-        
-        .metric-value {
-            font-size: 1.5rem !important;
-        }
-        
-        .metric-label {
-            font-size: 0.85rem !important;
-        }
-        
-        /* Stack columns on mobile */
-        [data-testid="column"] {
-            width: 100% !important;
-            flex: 100% !important;
-            max-width: 100% !important;
-        }
-    }
-    
-    /* Mobile phones (max-width: 480px) */
-    @media screen and (max-width: 480px) {
-        .main {
-            padding: 0.5rem !important;
-        }
-        
-        .hero-container {
-            padding: 1.5rem 1rem !important;
-            border-radius: 16px !important;
-        }
-        
-        .hero-title {
-            font-size: 1.8rem !important;
-        }
-        
-        .hero-subtitle {
-            font-size: 1rem !important;
-        }
-        
-        .hero-description {
-            font-size: 0.9rem !important;
-        }
-        
-        .card {
-            padding: 1rem !important;
-            border-radius: 10px !important;
-        }
-        
-        .prediction-card {
-            padding: 1rem !important;
-            margin: 1rem 0 !important;
-            border-radius: 12px !important;
-        }
-        
-        .prediction-text {
-            font-size: 1.1rem !important;
-        }
-        
-        .confidence-badge {
-            font-size: 0.85rem !important;
-            padding: 0.3rem 0.8rem !important;
-        }
-        
-        .prediction-item {
-            padding: 0.8rem !important;
-            flex-direction: column !important;
-            align-items: flex-start !important;
-        }
-        
-        .prediction-rank {
-            font-size: 1rem !important;
-            margin-bottom: 0.3rem !important;
-        }
-        
-        .prediction-word-item {
-            font-size: 1rem !important;
-            margin: 0.3rem 0 !important;
-        }
-        
-        .prediction-confidence {
-            font-size: 0.85rem !important;
-            margin-top: 0.3rem !important;
-        }
-        
-        .stButton > button {
-            font-size: 0.95rem !important;
-            padding: 0.6rem 1.5rem !important;
-        }
-        
-        .metric-value {
-            font-size: 1.3rem !important;
-        }
-        
-        .footer {
-            padding: 1.5rem 1rem !important;
-            font-size: 0.8rem !important;
-        }
-    }
-    
-    /* Ensure sidebar is collapsible on mobile */
-    @media screen and (max-width: 768px) {
-        section[data-testid="stSidebar"] {
-            width: 80vw !important;
-        }
-        
-        section[data-testid="stSidebar"] > div {
-            padding-top: 2rem !important;
-        }
-    }
     
     </style>
 """, unsafe_allow_html=True)
